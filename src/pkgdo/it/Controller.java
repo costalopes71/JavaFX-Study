@@ -2,6 +2,7 @@ package pkgdo.it;
 
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.beans.binding.Bindings;
@@ -67,6 +68,10 @@ public class Controller implements Initializable {
     private int lastId = 0;
     
     private final HashMap<Integer, Task> tasksMap = new HashMap<>();
+
+    public HashMap<Integer, Task> getTasksMap() {
+        return tasksMap;
+    }
     
     @FXML
     void addTask(ActionEvent event) {
@@ -209,6 +214,16 @@ public class Controller implements Initializable {
             
         }
 
+    }
+
+    void setTaskMap(Map<Integer, Task> readTasks) {
+
+        tasksMap.clear();
+        tasks.clear();
+        tasksMap.putAll(readTasks);
+        tasks.addAll(readTasks.values());
+        lastId = tasksMap.keySet().stream().max(Integer::compare).get();
+        
     }
 
 }

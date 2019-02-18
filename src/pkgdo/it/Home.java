@@ -5,29 +5,50 @@
  */
 package pkgdo.it;
 
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 /**
  *
  * @author joao
  */
 public class Home extends Application {
+   
+    Controller controller;
     
     @Override
     public void start(Stage primaryStage) throws IOException {
         
-        GridPane grid = FXMLLoader.load(getClass().getResource("ui.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("ui.fxml"));
+        
+        GridPane grid = loader.load();
+        controller = loader.getController();
+        
         Scene scene = new Scene(grid, 600, 400);
 
         primaryStage.setScene(scene);
         primaryStage.setTitle("Do-it!!");
         primaryStage.setAlwaysOnTop(false);
         primaryStage.setResizable(false);
+        
+        primaryStage.setOnCloseRequest(this::close);
+        
+        controller.setTaskMap(readTasksFile());
         
         primaryStage.show();
         
@@ -40,6 +61,39 @@ public class Home extends Application {
         launch(args);
     }
  
+    private Map<Integer, Task> readTasksFile() {
+        
+        Map<Integer, Task> taskMap = new HashMap<>();
+        try (InputStream is = new FileInputStream("task.xml");
+                XMLDecoder decoder = new XMLDecoder(is))
+        {
+            
+            taskMap = (Map<Integer, Task>) decoder.readObject();
+            decoder.close();
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        
+        return taskMap;
+    }
+    
+    private void close(WindowEvent event) {
+
+        try (OutputStream os = new FileOutputStream("task.xml");
+                XMLEncoder encoder = new XMLEncoder(os))
+        {
+            
+            encoder.writeObject(controller.getTasksMap());
+            encoder.close();
+            
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        
+    }
+    
 //    exemplo: 
     
 //    @Override
@@ -81,5 +135,6 @@ public class Home extends Application {
 //        primaryStage.show();
 //        
 //    }
+
     
 }
